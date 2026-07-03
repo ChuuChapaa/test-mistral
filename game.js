@@ -1,129 +1,96 @@
 // ============================================
-// Jeu de Plateforme : Chevalier Steampunk
+// JEU DE PLATEFORME : CHEVALIER STEAMPUNK
 // ============================================
 
-// Configuration du jeu
-const GAME_CONFIG = {
-    width: 1200,         // Largeur du canvas
-    height: 800,         // Hauteur du canvas
+// ==================== CONFIGURATION ====================
+const CONFIG = {
+    // Taille de l'écran visible
+    screenWidth: 1200,
+    screenHeight: 800,
+    
+    // Taille du monde (niveau)
+    worldWidth: 3000,
+    worldHeight: 800,
+    
+    // Physique
     gravity: 0.8,
     jumpForce: -12,
     jetpackForce: -0.5,
-    maxFuel: 100,
-    fuelConsumptionRate: 0.5,
-    fuelRegenerationRate: 0.1,
-    playerSpeed: 5,
-    platformHeight: 20,
-    platformColor: '#5c4a2a',
-    backgroundColor: '#121212',
-    playerWidth: 40,
-    playerHeight: 60,
-    coinSize: 20,
-    coinColor: '#d4a76a',
-    coinValue: 10,
-    barrelWidth: 30,
-    barrelHeight: 30,
-    barrelColor: '#4a3c2a',
-    barrelSpeed: 2,
-    barrelSpawnRate: 180, // Frames entre chaque spawn de tonneau (3 secondes à 60 FPS)
-    playerLives: 3,
-    camera: {
-        x: 0,
-        y: 0,
-        width: 1200,
-        height: 800
+    maxFallSpeed: 15,
+    
+    // Joueur
+    player: {
+        width: 40,
+        height: 60,
+        speed: 5,
+        lives: 3
+    },
+    
+    // Carburant
+    fuel: {
+        max: 100,
+        consumption: 0.5,
+        regeneration: 0.1
+    },
+    
+    // Plateformes
+    platform: {
+        height: 20,
+        color: '#5c4a2a'
+    },
+    
+    // Pièces
+    coin: {
+        size: 20,
+        color: '#d4a76a',
+        value: 10
+    },
+    
+    // Tonneaux
+    barrel: {
+        width: 30,
+        height: 30,
+        color: '#4a3c2a',
+        speed: 2,
+        spawnRate: 180 // frames (3 secondes à 60 FPS)
+    },
+    
+    // Couleurs
+    colors: {
+        background: '#121212',
+        player: '#3a2e1e',
+        helmet: '#5c4a2a',
+        jetpack: '#4a3c2a',
+        jetpackNozzle: '#d4a76a',
+        sword: '#8a8a8a',
+        flame: '#ff6b35'
     }
 };
 
-// État du jeu
-const gameState = {
+// ==================== ÉTAT DU JEU ====================
+const state = {
+    // Caméra
+    camera: {
+        x: 0,
+        y: 0
+    },
+    
+    // Joueur
     player: {
         x: 100,
-        y: 600,
-        width: GAME_CONFIG.playerWidth,
-        height: GAME_CONFIG.playerHeight,
+        y: 700,
+        width: CONFIG.player.width,
+        height: CONFIG.player.height,
         velocityX: 0,
         velocityY: 0,
-        isJumping: false,
         isOnGround: false,
         facingRight: true,
-        lives: GAME_CONFIG.playerLives,
+        lives: CONFIG.player.lives,
         invulnerable: false,
         invulnerabilityTimer: 0
     },
-    // Niveau plus grand avec plus de plateformes
-    platforms: [
-        // Sol
-        { x: 0, y: 780, width: 2400, height: GAME_CONFIG.platformHeight },
-        
-        // Niveau 1 (bas)
-        { x: 0, y: 700, width: 200, height: GAME_CONFIG.platformHeight },
-        { x: 300, y: 650, width: 200, height: GAME_CONFIG.platformHeight },
-        { x: 600, y: 600, width: 200, height: GAME_CONFIG.platformHeight },
-        { x: 900, y: 550, width: 200, height: GAME_CONFIG.platformHeight },
-        { x: 1200, y: 500, width: 200, height: GAME_CONFIG.platformHeight },
-        
-        // Niveau 2 (milieu-bas)
-        { x: 1500, y: 450, width: 200, height: GAME_CONFIG.platformHeight },
-        { x: 1800, y: 400, width: 200, height: GAME_CONFIG.platformHeight },
-        { x: 2100, y: 350, width: 200, height: GAME_CONFIG.platformHeight },
-        
-        // Niveau 3 (milieu)
-        { x: 0, y: 300, width: 200, height: GAME_CONFIG.platformHeight },
-        { x: 300, y: 250, width: 200, height: GAME_CONFIG.platformHeight },
-        { x: 600, y: 200, width: 200, height: GAME_CONFIG.platformHeight },
-        { x: 900, y: 150, width: 200, height: GAME_CONFIG.platformHeight },
-        
-        // Niveau 4 (milieu-haut)
-        { x: 1200, y: 100, width: 200, height: GAME_CONFIG.platformHeight },
-        { x: 1500, y: 50, width: 200, height: GAME_CONFIG.platformHeight },
-        
-        // Plateformes flottantes pour le jetpack
-        { x: 1800, y: 200, width: 150, height: GAME_CONFIG.platformHeight },
-        { x: 2000, y: 100, width: 150, height: GAME_CONFIG.platformHeight },
-        { x: 2200, y: 250, width: 150, height: GAME_CONFIG.platformHeight },
-        
-        // Plateformes pour les défis
-        { x: 400, y: 400, width: 100, height: GAME_CONFIG.platformHeight },
-        { x: 500, y: 350, width: 100, height: GAME_CONFIG.platformHeight },
-        { x: 700, y: 450, width: 100, height: GAME_CONFIG.platformHeight }
-    ],
-    coins: [
-        // Niveau 1
-        { x: 50, y: 680, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false },
-        { x: 350, y: 630, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false },
-        { x: 650, y: 580, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false },
-        { x: 950, y: 530, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false },
-        { x: 1250, y: 480, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false },
-        
-        // Niveau 2
-        { x: 1550, y: 430, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false },
-        { x: 1850, y: 380, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false },
-        { x: 2150, y: 330, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false },
-        
-        // Niveau 3
-        { x: 50, y: 280, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false },
-        { x: 350, y: 230, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false },
-        { x: 650, y: 180, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false },
-        { x: 950, y: 130, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false },
-        
-        // Niveau 4
-        { x: 1250, y: 80, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false },
-        { x: 1550, y: 30, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false },
-        
-        // Plateformes flottantes
-        { x: 1850, y: 180, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false },
-        { x: 2050, y: 80, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false },
-        { x: 2250, y: 230, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false },
-        
-        // Défis
-        { x: 450, y: 380, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false },
-        { x: 550, y: 330, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false },
-        { x: 750, y: 430, width: GAME_CONFIG.coinSize, height: GAME_CONFIG.coinSize, collected: false }
-    ],
-    barrels: [],
-    fuel: GAME_CONFIG.maxFuel,
-    score: 0,
+    
+    // Contrôles
     keys: {
         left: false,
         right: false,
@@ -131,20 +98,92 @@ const gameState = {
         space: false,
         shift: false
     },
-    lastTime: 0,
-    frameCount: 0,
-    livesElement: null,
-    worldWidth: 2400,  // Largeur totale du monde
-    worldHeight: 800  // Hauteur totale du monde
+    
+    // Plateformes (niveau grand)
+    platforms: [
+        // Sol (très large)
+        { x: 0, y: 780, width: CONFIG.worldWidth, height: CONFIG.platform.height },
+        
+        // Niveau 1 - Début (facile)
+        { x: 0, y: 700, width: 200, height: CONFIG.platform.height },
+        { x: 300, y: 650, width: 200, height: CONFIG.platform.height },
+        { x: 600, y: 600, width: 200, height: CONFIG.platform.height },
+        { x: 900, y: 550, width: 200, height: CONFIG.platform.height },
+        
+        // Niveau 2 - Milieu (moyen)
+        { x: 1200, y: 500, width: 200, height: CONFIG.platform.height },
+        { x: 1500, y: 450, width: 200, height: CONFIG.platform.height },
+        { x: 1800, y: 400, width: 200, height: CONFIG.platform.height },
+        { x: 2100, y: 350, width: 200, height: CONFIG.platform.height },
+        
+        // Niveau 3 - Haut (difficile)
+        { x: 2400, y: 300, width: 200, height: CONFIG.platform.height },
+        { x: 2700, y: 250, width: 200, height: CONFIG.platform.height },
+        
+        // Plateformes flottantes (pour jetpack)
+        { x: 500, y: 400, width: 150, height: CONFIG.platform.height },
+        { x: 1000, y: 300, width: 150, height: CONFIG.platform.height },
+        { x: 1500, y: 200, width: 150, height: CONFIG.platform.height },
+        { x: 2000, y: 150, width: 150, height: CONFIG.platform.height },
+        { x: 2500, y: 200, width: 150, height: CONFIG.platform.height },
+        
+        // Plateformes pour défis
+        { x: 700, y: 500, width: 100, height: CONFIG.platform.height },
+        { x: 850, y: 450, width: 100, height: CONFIG.platform.height },
+        { x: 1000, y: 500, width: 100, height: CONFIG.platform.height },
+        { x: 2200, y: 450, width: 100, height: CONFIG.platform.height },
+        { x: 2350, y: 400, width: 100, height: CONFIG.platform.height }
+    ],
+    
+    // Pièces à collecter
+    coins: [
+        // Niveau 1
+        { x: 50, y: 680, size: CONFIG.coin.size, collected: false },
+        { x: 350, y: 630, size: CONFIG.coin.size, collected: false },
+        { x: 650, y: 580, size: CONFIG.coin.size, collected: false },
+        { x: 950, y: 530, size: CONFIG.coin.size, collected: false },
+        
+        // Niveau 2
+        { x: 1250, y: 480, size: CONFIG.coin.size, collected: false },
+        { x: 1550, y: 430, size: CONFIG.coin.size, collected: false },
+        { x: 1850, y: 380, size: CONFIG.coin.size, collected: false },
+        { x: 2150, y: 330, size: CONFIG.coin.size, collected: false },
+        
+        // Niveau 3
+        { x: 2450, y: 280, size: CONFIG.coin.size, collected: false },
+        { x: 2750, y: 230, size: CONFIG.coin.size, collected: false },
+        
+        // Plateformes flottantes
+        { x: 550, y: 380, size: CONFIG.coin.size, collected: false },
+        { x: 1050, y: 280, size: CONFIG.coin.size, collected: false },
+        { x: 1550, y: 180, size: CONFIG.coin.size, collected: false },
+        { x: 2050, y: 130, size: CONFIG.coin.size, collected: false },
+        { x: 2550, y: 180, size: CONFIG.coin.size, collected: false },
+        
+        // Défis
+        { x: 750, y: 480, size: CONFIG.coin.size, collected: false },
+        { x: 900, y: 430, size: CONFIG.coin.size, collected: false },
+        { x: 1050, y: 480, size: CONFIG.coin.size, collected: false },
+        { x: 2250, y: 430, size: CONFIG.coin.size, collected: false },
+        { x: 2400, y: 380, size: CONFIG.coin.size, collected: false }
+    ],
+    
+    // Tonneaux
+    barrels: [],
+    
+    // Stats
+    fuel: CONFIG.fuel.max,
+    score: 0,
+    frameCount: 0
 };
 
-// Éléments DOM
-let canvas, ctx, fuelBar, fuelValue, scoreValue, livesValue;
+// ==================== ÉLÉMENTS DOM ====================
+let canvas, ctx;
+let fuelBar, fuelValue, scoreValue, livesValue;
 
-// ============================================
-// Initialisation du jeu
-// ============================================
-function initGame() {
+// ==================== INITIALISATION ====================
+function init() {
+    // Récupérer les éléments DOM
     canvas = document.getElementById('game-canvas');
     ctx = canvas.getContext('2d');
     fuelBar = document.getElementById('fuel-bar');
@@ -152,216 +191,193 @@ function initGame() {
     scoreValue = document.getElementById('score-value');
     livesValue = document.getElementById('lives-value');
     
-    // Définir la taille du canvas
-    canvas.width = GAME_CONFIG.camera.width;
-    canvas.height = GAME_CONFIG.camera.height;
+    // Configurer le canvas
+    canvas.width = CONFIG.screenWidth;
+    canvas.height = CONFIG.screenHeight;
     
-    // Initialiser l'affichage des vies
-    livesValue.textContent = `❤️ ${gameState.player.lives}`;
+    // Initialiser l'UI
+    updateUI();
     
     // Démarrer la boucle de jeu
     requestAnimationFrame(gameLoop);
 }
 
-// ============================================
-// Dessiner le joueur (chevalier avec jetpack)
-// ============================================
-function drawPlayer() {
-    const { x, y, width, height, facingRight, invulnerable } = gameState.player;
+// ==================== MISE À JOUR UI ====================
+function updateUI() {
+    if (fuelBar) fuelBar.value = state.fuel;
+    if (fuelValue) fuelValue.textContent = `${Math.round(state.fuel)}%`;
+    if (scoreValue) scoreValue.textContent = state.score;
+    if (livesValue) livesValue.textContent = `❤️ ${state.player.lives}`;
     
-    // Clignotement si invulnérable
-    if (invulnerable && Math.floor(gameState.frameCount / 10) % 2 === 0) {
-        return; // Ne pas dessiner le joueur une frame sur deux
-    }
-    
-    // Position relative à la caméra
-    const drawX = x - GAME_CONFIG.camera.x;
-    const drawY = y - GAME_CONFIG.camera.y;
-    
-    // Corps du chevalier
-    ctx.fillStyle = '#3a2e1e'; // Marron foncé pour l'armure
-    ctx.fillRect(drawX, drawY, width, height);
-    
-    // Casque
-    ctx.fillStyle = '#5c4a2a';
-    ctx.fillRect(drawX + 5, drawY - 10, width - 10, 15);
-    
-    // Visière du casque
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(drawX + 15, drawY - 5, 10, 5);
-    
-    // Jetpack (steampunk)
-    ctx.fillStyle = '#4a3c2a'; // Marron métallique
-    ctx.fillRect(drawX + 5, drawY + height - 5, width - 10, 25);
-    
-    // Détail du jetpack (tuyères)
-    ctx.fillStyle = '#d4a76a'; // Or/cuivre
-    if (facingRight) {
-        ctx.fillRect(drawX + width - 15, drawY + height, 10, 15);
-        ctx.fillRect(drawX + width - 20, drawY + height + 5, 5, 5);
+    // Couleur de la barre de carburant
+    if (state.fuel < 20) {
+        fuelBar.style.accentColor = '#ff3333';
+    } else if (state.fuel < 50) {
+        fuelBar.style.accentColor = '#ff9933';
     } else {
-        ctx.fillRect(drawX, drawY + height, 10, 15);
-        ctx.fillRect(drawX + 5, drawY + height + 5, 5, 5);
-    }
-    
-    // Bras
-    ctx.fillStyle = '#3a2e1e';
-    if (facingRight) {
-        ctx.fillRect(drawX + width - 5, drawY + 15, 10, 15); // Bras droit
-        ctx.fillRect(drawX - 5, drawY + 15, 10, 15); // Bras gauche
-    } else {
-        ctx.fillRect(drawX + width - 5, drawY + 15, 10, 15); // Bras gauche
-        ctx.fillRect(drawX - 5, drawY + 15, 10, 15); // Bras droit
-    }
-    
-    // Jambes
-    ctx.fillStyle = '#3a2e1e';
-    ctx.fillRect(drawX + 5, drawY + height - 20, 10, 20); // Jambe gauche
-    ctx.fillRect(drawX + width - 15, drawY + height - 20, 10, 20); // Jambe droite
-    
-    // Épée (accrochée à la ceinture)
-    ctx.fillStyle = '#8a8a8a';
-    if (facingRight) {
-        ctx.fillRect(drawX + width - 5, drawY + 25, 5, 20);
-    } else {
-        ctx.fillRect(drawX - 5, drawY + 25, 5, 20);
-    }
-    
-    // Flamme du jetpack (si activé)
-    if (gameState.keys.shift && gameState.fuel > 0) {
-        ctx.fillStyle = '#ff6b35';
-        if (facingRight) {
-            ctx.beginPath();
-            ctx.moveTo(drawX + width - 10, drawY + height + 15);
-            ctx.lineTo(drawX + width - 20, drawY + height + 25);
-            ctx.lineTo(drawX + width - 15, drawY + height + 30);
-            ctx.closePath();
-            ctx.fill();
-        } else {
-            ctx.beginPath();
-            ctx.moveTo(drawX + 10, drawY + height + 15);
-            ctx.lineTo(drawX + 20, drawY + height + 25);
-            ctx.lineTo(drawX + 15, drawY + height + 30);
-            ctx.closePath();
-            ctx.fill();
-        }
+        fuelBar.style.accentColor = '#d4a76a';
     }
 }
 
-// ============================================
+// ==================== CAMÉRA ====================
+function updateCamera() {
+    const playerCenter = state.player.x + state.player.width / 2;
+    const cameraCenter = state.camera.x + CONFIG.screenWidth / 2;
+    
+    // Suivre le joueur avec une marge
+    const margin = 200;
+    if (playerCenter > cameraCenter + margin) {
+        state.camera.x = playerCenter - CONFIG.screenWidth / 2;
+    } else if (playerCenter < cameraCenter - margin) {
+        state.camera.x = playerCenter - CONFIG.screenWidth / 2;
+    }
+    
+    // Limiter la caméra aux bords du monde
+    state.camera.x = Math.max(0, Math.min(state.camera.x, CONFIG.worldWidth - CONFIG.screenWidth));
+    state.camera.y = 0; // Pas de défilement vertical
+}
+
+// ==================== DESSIN ====================
+
+// Dessiner le fond
+function drawBackground() {
+    ctx.fillStyle = CONFIG.colors.background;
+    ctx.fillRect(0, 0, CONFIG.screenWidth, CONFIG.screenHeight);
+    
+    // Étoiles de fond
+    ctx.fillStyle = 'rgba(212, 167, 106, 0.15)';
+    for (let i = 0; i < 200; i++) {
+        const x = (i * 15 + state.camera.x * 0.3) % CONFIG.screenWidth;
+        const y = Math.random() * CONFIG.screenHeight;
+        const size = Math.random() * 1.5;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    
+    // Lignes de profondeur
+    ctx.strokeStyle = 'rgba(92, 74, 42, 0.15)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 14; i++) {
+        const y = i * 60;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(CONFIG.screenWidth, y);
+        ctx.stroke();
+    }
+}
+
 // Dessiner les plateformes
-// ============================================
 function drawPlatforms() {
-    ctx.fillStyle = GAME_CONFIG.platformColor;
-    gameState.platforms.forEach(platform => {
-        const drawX = platform.x - GAME_CONFIG.camera.x;
-        const drawY = platform.y - GAME_CONFIG.camera.y;
+    ctx.fillStyle = CONFIG.platform.color;
+    
+    state.platforms.forEach(platform => {
+        const x = platform.x - state.camera.x;
+        const y = platform.y - state.camera.y;
         
-        // Ne dessiner que les plateformes visibles à l'écran
-        if (drawX + platform.width < 0 || drawX > GAME_CONFIG.camera.width) return;
-        if (drawY + platform.height < 0 || drawY > GAME_CONFIG.camera.height) return;
+        // Ne dessiner que si visible
+        if (x + platform.width < 0 || x > CONFIG.screenWidth) return;
+        if (y + platform.height < 0 || y > CONFIG.screenHeight) return;
         
-        ctx.fillRect(drawX, drawY, platform.width, platform.height);
+        // Plateforme
+        ctx.fillRect(x, y, platform.width, platform.height);
         
-        // Ajouter des détails pour un look steampunk
+        // Bordure
         ctx.strokeStyle = '#8a7b5a';
         ctx.lineWidth = 2;
-        ctx.strokeRect(drawX, drawY, platform.width, platform.height);
+        ctx.strokeRect(x, y, platform.width, platform.height);
         
-        // Boulons sur les plateformes
+        // Boulons
         ctx.fillStyle = '#3a3a3a';
-        for (let i = 0; i < platform.width; i += 30) {
+        for (let i = 20; i < platform.width; i += 40) {
             ctx.beginPath();
-            ctx.arc(drawX + i + 10, drawY + 10, 3, 0, Math.PI * 2);
+            ctx.arc(x + i, y + 10, 3, 0, Math.PI * 2);
             ctx.fill();
         }
     });
 }
 
-// ============================================
 // Dessiner les pièces
-// ============================================
 function drawCoins() {
-    gameState.coins.forEach(coin => {
-        if (!coin.collected) {
-            const drawX = coin.x - GAME_CONFIG.camera.x;
-            const drawY = coin.y - GAME_CONFIG.camera.y;
-            
-            // Ne dessiner que les pièces visibles à l'écran
-            if (drawX + coin.width < 0 || drawX > GAME_CONFIG.camera.width) return;
-            if (drawY + coin.height < 0 || drawY > GAME_CONFIG.camera.height) return;
-            
-            // Corps de la pièce (sac)
-            ctx.fillStyle = GAME_CONFIG.coinColor;
-            ctx.beginPath();
-            ctx.arc(drawX + coin.width / 2, drawY + coin.height / 2, coin.width / 2, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Détail du sac
-            ctx.strokeStyle = '#8a7b5a';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(drawX + coin.width / 2, drawY + coin.height / 2, coin.width / 2, 0, Math.PI * 2);
-            ctx.stroke();
-            
-            // Cordon du sac
-            ctx.strokeStyle = '#5c4a2a';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(drawX + coin.width / 2, drawY);
-            ctx.lineTo(drawX + coin.width / 2, drawY - 5);
-            ctx.stroke();
-            
-            // Symbole de pièce sur le sac
-            ctx.fillStyle = '#1a1a1a';
-            ctx.font = '8px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('$', drawX + coin.width / 2, drawY + coin.height / 2 + 3);
-        }
-    });
-}
-
-// ============================================
-// Dessiner les tonneaux
-// ============================================
-function drawBarrels() {
-    gameState.barrels.forEach(barrel => {
-        const drawX = barrel.x - GAME_CONFIG.camera.x;
-        const drawY = barrel.y - GAME_CONFIG.camera.y;
+    state.coins.forEach(coin => {
+        if (coin.collected) return;
         
-        // Ne dessiner que les tonneaux visibles à l'écran
-        if (drawX + barrel.width < 0 || drawX > GAME_CONFIG.camera.width) return;
-        if (drawY + barrel.height < 0 || drawY > GAME_CONFIG.camera.height) return;
+        const x = coin.x - state.camera.x;
+        const y = coin.y - state.camera.y;
         
-        // Corps du tonneau
-        ctx.fillStyle = GAME_CONFIG.barrelColor;
+        // Ne dessiner que si visible
+        if (x + coin.size < 0 || x > CONFIG.screenWidth) return;
+        if (y + coin.size < 0 || y > CONFIG.screenHeight) return;
+        
+        // Sac de pièces
+        ctx.fillStyle = CONFIG.coin.color;
         ctx.beginPath();
-        ctx.arc(drawX + barrel.width / 2, drawY + barrel.height / 2, barrel.width / 2, 0, Math.PI * 2);
+        ctx.arc(x + coin.size/2, y + coin.size/2, coin.size/2, 0, Math.PI * 2);
         ctx.fill();
         
-        // Cercles métalliques du tonneau
+        // Bordure du sac
+        ctx.strokeStyle = '#8a7b5a';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x + coin.size/2, y + coin.size/2, coin.size/2, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        // Cordon
+        ctx.strokeStyle = '#5c4a2a';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x + coin.size/2, y);
+        ctx.lineTo(x + coin.size/2, y - 5);
+        ctx.stroke();
+        
+        // Symbole $
+        ctx.fillStyle = '#1a1a1a';
+        ctx.font = 'bold 10px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('$', x + coin.size/2, y + coin.size/2);
+    });
+}
+
+// Dessiner les tonneaux
+function drawBarrels() {
+    state.barrels.forEach(barrel => {
+        const x = barrel.x - state.camera.x;
+        const y = barrel.y - state.camera.y;
+        
+        // Ne dessiner que si visible
+        if (x + barrel.width < 0 || x > CONFIG.screenWidth) return;
+        if (y + barrel.height < 0 || y > CONFIG.screenHeight) return;
+        
+        // Corps du tonneau
+        ctx.fillStyle = CONFIG.barrel.color;
+        ctx.beginPath();
+        ctx.arc(x + barrel.width/2, y + barrel.height/2, barrel.width/2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Cercles métalliques
         ctx.strokeStyle = '#3a3a3a';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(drawX + barrel.width / 2, drawY + barrel.height / 2, barrel.width / 2, 0, Math.PI * 2);
+        ctx.arc(x + barrel.width/2, y + barrel.height/2, barrel.width/2, 0, Math.PI * 2);
         ctx.stroke();
         
-        // Détail des cercles
+        // Cercle intérieur
         ctx.strokeStyle = '#8a7b5a';
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.arc(drawX + barrel.width / 2, drawY + barrel.height / 2, barrel.width / 2 - 5, 0, Math.PI * 2);
+        ctx.arc(x + barrel.width/2, y + barrel.height/2, barrel.width/2 - 5, 0, Math.PI * 2);
         ctx.stroke();
         
-        // Lignes verticales pour un look tonneau
+        // Lignes verticales
         ctx.strokeStyle = '#5c4a2a';
         ctx.lineWidth = 1;
-        for (let i = 0; i < 5; i++) {
-            const angle = (i / 5) * Math.PI * 2;
-            const x1 = drawX + barrel.width / 2 + Math.cos(angle) * (barrel.width / 2 - 3);
-            const y1 = drawY + barrel.height / 2 + Math.sin(angle) * (barrel.height / 2 - 3);
-            const x2 = drawX + barrel.width / 2 + Math.cos(angle) * (barrel.width / 2 + 3);
-            const y2 = drawY + barrel.height / 2 + Math.sin(angle) * (barrel.height / 2 + 3);
+        for (let i = 0; i < 6; i++) {
+            const angle = (i / 6) * Math.PI * 2;
+            const x1 = x + barrel.width/2 + Math.cos(angle) * (barrel.width/2 - 3);
+            const y1 = y + barrel.height/2 + Math.sin(angle) * (barrel.height/2 - 3);
+            const x2 = x + barrel.width/2 + Math.cos(angle) * (barrel.width/2 + 3);
+            const y2 = y + barrel.height/2 + Math.sin(angle) * (barrel.height/2 + 3);
             ctx.beginPath();
             ctx.moveTo(x1, y1);
             ctx.lineTo(x2, y2);
@@ -370,519 +386,405 @@ function drawBarrels() {
     });
 }
 
-// ============================================
-// Dessiner le fond
-// ============================================
-function drawBackground() {
-    // Fond principal
-    ctx.fillStyle = GAME_CONFIG.backgroundColor;
-    ctx.fillRect(0, 0, GAME_CONFIG.camera.width, GAME_CONFIG.camera.height);
+// Dessiner le joueur
+function drawPlayer() {
+    const p = state.player;
+    const x = p.x - state.camera.x;
+    const y = p.y - state.camera.y;
     
-    // Étoiles ou éléments de fond
-    ctx.fillStyle = 'rgba(212, 167, 106, 0.1)';
-    for (let i = 0; i < 100; i++) {
-        const x = (i * 24) % GAME_CONFIG.camera.width;
-        const y = Math.random() * GAME_CONFIG.camera.height;
-        const size = Math.random() * 2;
-        ctx.beginPath();
-        ctx.arc(x, y, size, 0, Math.PI * 2);
-        ctx.fill();
+    // Clignotement si invulnérable
+    if (p.invulnerable && state.frameCount % 10 < 5) {
+        return;
     }
     
-    // Lignes de fond pour donner de la profondeur
-    ctx.strokeStyle = 'rgba(92, 74, 42, 0.2)';
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 14; i++) {
-        const y = i * 60;
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(GAME_CONFIG.camera.width, y);
-        ctx.stroke();
-    }
-}
-
-// ============================================
-// Mettre à jour l'interface utilisateur
-// ============================================
-function updateUI() {
-    fuelBar.value = gameState.fuel;
-    fuelValue.textContent = `${Math.round(gameState.fuel)}%`;
-    scoreValue.textContent = gameState.score;
-    livesValue.textContent = `❤️ ${gameState.player.lives}`;
+    // Corps
+    ctx.fillStyle = CONFIG.colors.player;
+    ctx.fillRect(x, y, p.width, p.height);
     
-    // Changer la couleur de la barre de carburant en fonction du niveau
-    if (gameState.fuel < 20) {
-        fuelBar.style.accentColor = '#ff3333';
-    } else if (gameState.fuel < 50) {
-        fuelBar.style.accentColor = '#ff9933';
+    // Casque
+    ctx.fillStyle = CONFIG.colors.helmet;
+    ctx.fillRect(x + 5, y - 10, p.width - 10, 15);
+    
+    // Visière
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(x + 15, y - 5, 10, 5);
+    
+    // Jetpack
+    ctx.fillStyle = CONFIG.colors.jetpack;
+    ctx.fillRect(x + 5, y + p.height - 5, p.width - 10, 25);
+    
+    // Tuyères du jetpack
+    ctx.fillStyle = CONFIG.colors.jetpackNozzle;
+    if (p.facingRight) {
+        ctx.fillRect(x + p.width - 15, y + p.height, 10, 15);
+        ctx.fillRect(x + p.width - 20, y + p.height + 5, 5, 5);
     } else {
-        fuelBar.style.accentColor = '#d4a76a';
+        ctx.fillRect(x, y + p.height, 10, 15);
+        ctx.fillRect(x + 5, y + p.height + 5, 5, 5);
+    }
+    
+    // Bras
+    ctx.fillStyle = CONFIG.colors.player;
+    if (p.facingRight) {
+        ctx.fillRect(x + p.width - 5, y + 15, 10, 15); // Bras droit
+        ctx.fillRect(x - 5, y + 15, 10, 15); // Bras gauche
+    } else {
+        ctx.fillRect(x + p.width - 5, y + 15, 10, 15); // Bras gauche
+        ctx.fillRect(x - 5, y + 15, 10, 15); // Bras droit
+    }
+    
+    // Jambes
+    ctx.fillRect(x + 5, y + p.height - 20, 10, 20); // Jambe gauche
+    ctx.fillRect(x + p.width - 15, y + p.height - 20, 10, 20); // Jambe droite
+    
+    // Épée
+    ctx.fillStyle = CONFIG.colors.sword;
+    if (p.facingRight) {
+        ctx.fillRect(x + p.width - 5, y + 25, 5, 20);
+    } else {
+        ctx.fillRect(x - 5, y + 25, 5, 20);
+    }
+    
+    // Flamme du jetpack
+    if (state.keys.shift && state.fuel > 0) {
+        ctx.fillStyle = CONFIG.colors.flame;
+        if (p.facingRight) {
+            ctx.beginPath();
+            ctx.moveTo(x + p.width - 10, y + p.height + 15);
+            ctx.lineTo(x + p.width - 20, y + p.height + 25);
+            ctx.lineTo(x + p.width - 15, y + p.height + 30);
+            ctx.closePath();
+            ctx.fill();
+        } else {
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y + p.height + 15);
+            ctx.lineTo(x + 20, y + p.height + 25);
+            ctx.lineTo(x + 15, y + p.height + 30);
+            ctx.closePath();
+            ctx.fill();
+        }
     }
 }
 
-// ============================================
-// Mettre à jour la caméra
-// ============================================
-function updateCamera() {
-    const player = gameState.player;
-    
-    // Centrer la caméra sur le joueur (horizontalement)
-    const centerX = player.x + player.width / 2;
-    const cameraCenterX = GAME_CONFIG.camera.x + GAME_CONFIG.camera.width / 2;
-    
-    // Déplacer la caméra pour suivre le joueur
-    if (centerX > cameraCenterX + 100) {
-        GAME_CONFIG.camera.x = centerX - GAME_CONFIG.camera.width / 2;
-    } else if (centerX < cameraCenterX - 100) {
-        GAME_CONFIG.camera.x = centerX - GAME_CONFIG.camera.width / 2;
-    }
-    
-    // Limiter la caméra aux limites du monde
-    if (GAME_CONFIG.camera.x < 0) {
-        GAME_CONFIG.camera.x = 0;
-    }
-    if (GAME_CONFIG.camera.x + GAME_CONFIG.camera.width > gameState.worldWidth) {
-        GAME_CONFIG.camera.x = gameState.worldWidth - GAME_CONFIG.camera.width;
-    }
-    
-    // Limiter la caméra verticalement (le monde fait 800px de haut)
-    if (GAME_CONFIG.camera.y < 0) {
-        GAME_CONFIG.camera.y = 0;
-    }
-    if (GAME_CONFIG.camera.y + GAME_CONFIG.camera.height > gameState.worldHeight) {
-        GAME_CONFIG.camera.y = gameState.worldHeight - GAME_CONFIG.camera.height;
-    }
-}
+// ==================== COLLISIONS ====================
 
-// ============================================
-// Vérifier les collisions avec les pièces
-// ============================================
-function checkCoinCollisions() {
-    const player = gameState.player;
+// Vérifier les collisions avec les plateformes
+function checkPlatformCollisions() {
+    const p = state.player;
+    p.isOnGround = false;
     
-    gameState.coins.forEach(coin => {
-        if (!coin.collected) {
-            if (
-                player.x < coin.x + coin.width &&
-                player.x + player.width > coin.x &&
-                player.y < coin.y + coin.height &&
-                player.y + player.height > coin.y
-            ) {
-                coin.collected = true;
-                gameState.score += GAME_CONFIG.coinValue;
+    for (const platform of state.platforms) {
+        if (
+            p.x < platform.x + platform.width &&
+            p.x + p.width > platform.x &&
+            p.y < platform.y + platform.height &&
+            p.y + p.height > platform.y
+        ) {
+            // Collision par le bas (atterrissage)
+            if (p.velocityY > 0 && p.y + p.height >= platform.y && p.y + p.height <= platform.y + 10) {
+                p.y = platform.y - p.height;
+                p.velocityY = 0;
+                p.isOnGround = true;
             }
+            // Collision par le haut
+            else if (p.velocityY < 0 && p.y <= platform.y + platform.height && p.y >= platform.y) {
+                p.y = platform.y + platform.height;
+                p.velocityY = 0;
+            }
+            // Collision à gauche
+            if (p.velocityX < 0 && p.x <= platform.x + platform.width && p.x >= platform.x) {
+                p.x = platform.x - p.width;
+                p.velocityX = 0;
+            }
+            // Collision à droite
+            if (p.velocityX > 0 && p.x + p.width >= platform.x && p.x <= platform.x) {
+                p.x = platform.x + platform.width;
+                p.velocityX = 0;
+            }
+        }
+    }
+    
+    // Chute hors du monde
+    if (p.y > CONFIG.worldHeight) {
+        p.lives--;
+        if (p.lives <= 0) {
+            resetGame();
+        } else {
+            resetPlayer();
+        }
+    }
+}
+
+// Vérifier les collisions avec les pièces
+function checkCoinCollisions() {
+    const p = state.player;
+    
+    state.coins.forEach(coin => {
+        if (coin.collected) return;
+        
+        if (
+            p.x < coin.x + coin.size &&
+            p.x + p.width > coin.x &&
+            p.y < coin.y + coin.size &&
+            p.y + p.height > coin.y
+        ) {
+            coin.collected = true;
+            state.score += CONFIG.coin.value;
         }
     });
 }
 
-// ============================================
 // Vérifier les collisions avec les tonneaux
-// ============================================
 function checkBarrelCollisions() {
-    const player = gameState.player;
+    const p = state.player;
     
-    for (let i = gameState.barrels.length - 1; i >= 0; i--) {
-        const barrel = gameState.barrels[i];
+    for (let i = state.barrels.length - 1; i >= 0; i--) {
+        const barrel = state.barrels[i];
         
         // Collision avec le joueur
         if (
-            player.x < barrel.x + barrel.width &&
-            player.x + player.width > barrel.x &&
-            player.y < barrel.y + barrel.height &&
-            player.y + player.height > barrel.y
+            p.x < barrel.x + barrel.width &&
+            p.x + p.width > barrel.x &&
+            p.y < barrel.y + barrel.height &&
+            p.y + p.height > barrel.y
         ) {
-            if (!player.invulnerable) {
-                player.lives--;
-                player.invulnerable = true;
-                player.invulnerabilityTimer = 120; // 2 secondes d'invulnérabilité (60 FPS)
+            if (!p.invulnerable) {
+                p.lives--;
+                p.invulnerable = true;
+                p.invulnerabilityTimer = 120; // 2 secondes
                 
-                // Réinitialiser le joueur s'il n'a plus de vies
-                if (player.lives <= 0) {
-                    resetPlayer();
+                if (p.lives <= 0) {
+                    resetGame();
                 } else {
-                    // Faire reculer le joueur
-                    if (player.x + player.width / 2 < barrel.x + barrel.width / 2) {
-                        player.x = barrel.x - player.width - 5;
+                    // Reculer le joueur
+                    if (p.x + p.width/2 < barrel.x + barrel.width/2) {
+                        p.x = barrel.x - p.width - 5;
                     } else {
-                        player.x = barrel.x + barrel.width + 5;
+                        p.x = barrel.x + barrel.width + 5;
                     }
-                    player.velocityY = -5; // Petit saut pour éviter le tonneau
+                    p.velocityY = -5;
                 }
             }
-            
-            // Retirer le tonneau après collision
-            gameState.barrels.splice(i, 1);
+            state.barrels.splice(i, 1);
         }
         
-        // Collision avec les plateformes (pour que les tonneaux roulent)
+        // Collision avec les plateformes
         let onPlatform = false;
-        for (const platform of gameState.platforms) {
+        for (const platform of state.platforms) {
             if (
                 barrel.x < platform.x + platform.width &&
                 barrel.x + barrel.width > platform.x &&
                 barrel.y + barrel.height >= platform.y &&
                 barrel.y + barrel.height <= platform.y + 10
             ) {
-                // Le tonneau est sur une plateforme
                 barrel.y = platform.y - barrel.height;
                 barrel.velocityY = 0;
                 onPlatform = true;
                 
-                // Inverser la direction si le tonneau atteint le bord d'une plateforme
+                // Inverser la direction aux bords
                 if (barrel.x <= platform.x || barrel.x + barrel.width >= platform.x + platform.width) {
                     barrel.velocityX *= -1;
                 }
             }
         }
         
-        // Si le tonneau n'est pas sur une plateforme, appliquer la gravité
+        // Gravité si pas sur plateforme
         if (!onPlatform) {
-            barrel.velocityY += GAME_CONFIG.gravity * 0.5;
+            barrel.velocityY += CONFIG.gravity * 0.5;
         }
         
-        // Collision avec les bords de l'écran (monde)
-        if (barrel.x <= 0 || barrel.x + barrel.width >= gameState.worldWidth) {
+        // Bords du monde
+        if (barrel.x <= 0 || barrel.x + barrel.width >= CONFIG.worldWidth) {
             barrel.velocityX *= -1;
         }
         
-        // Si le tonneau tombe hors de l'écran, le retirer
-        if (barrel.y > gameState.worldHeight) {
-            gameState.barrels.splice(i, 1);
+        // Hors du monde
+        if (barrel.y > CONFIG.worldHeight) {
+            state.barrels.splice(i, 1);
         }
     }
 }
 
-// ============================================
-// Vérifier les collisions avec les plateformes
-// ============================================
-function checkPlatformCollisions() {
-    const player = gameState.player;
-    let isOnGround = false;
-    
-    // Réinitialiser l'état de saut et de sol
-    player.isOnGround = false;
-    
-    // Vérifier les collisions avec les plateformes
-    for (const platform of gameState.platforms) {
-        // Collision horizontale
-        if (
-            player.x < platform.x + platform.width &&
-            player.x + player.width > platform.x &&
-            player.y < platform.y + platform.height &&
-            player.y + player.height > platform.y
-        ) {
-            // Collision par le bas (atterrissage sur la plateforme)
-            if (player.velocityY > 0 && player.y + player.height >= platform.y && player.y + player.height <= platform.y + 10) {
-                player.y = platform.y - player.height;
-                player.velocityY = 0;
-                player.isOnGround = true;
-                isOnGround = true;
-            }
-            
-            // Collision par le haut
-            if (player.velocityY < 0 && player.y <= platform.y + platform.height && player.y >= platform.y) {
-                player.y = platform.y + platform.height;
-                player.velocityY = 0;
-            }
-            
-            // Collision à gauche
-            if (player.velocityX < 0 && player.x <= platform.x + platform.width && player.x >= platform.x) {
-                player.x = platform.x - player.width;
-                player.velocityX = 0;
-            }
-            
-            // Collision à droite
-            if (player.velocityX > 0 && player.x + player.width >= platform.x && player.x <= platform.x) {
-                player.x = platform.x + platform.width;
-                player.velocityX = 0;
-            }
-        }
-    }
-    
-    // Vérifier si le joueur tombe hors du monde
-    if (player.y > gameState.worldHeight) {
-        player.lives--;
-        if (player.lives <= 0) {
-            resetPlayer();
-        } else {
-            resetPlayerPosition();
-        }
-    }
-    
-    // Mettre à jour l'état de saut
-    if (!isOnGround && player.velocityY >= 0) {
-        player.isJumping = true;
-    } else {
-        player.isJumping = false;
-    }
-    
-    // Mettre à jour l'état au sol
-    player.isOnGround = isOnGround;
-}
+// ==================== MISE À JOUR ====================
 
-// ============================================
-// Vérifier toutes les collisions
-// ============================================
-function checkCollisions() {
-    checkPlatformCollisions();
-    checkCoinCollisions();
-    checkBarrelCollisions();
-}
-
-// ============================================
-// Réinitialiser le joueur complètement
-// ============================================
-function resetPlayer() {
-    gameState.player.x = 100;
-    gameState.player.y = 600;
-    gameState.player.velocityX = 0;
-    gameState.player.velocityY = 0;
-    gameState.player.lives = GAME_CONFIG.playerLives;
-    gameState.player.invulnerable = false;
-    gameState.player.invulnerabilityTimer = 0;
-    gameState.fuel = GAME_CONFIG.maxFuel;
-    gameState.score = 0;
-    gameState.barrels = [];
-    GAME_CONFIG.camera.x = 0;
-    GAME_CONFIG.camera.y = 0;
+// Réinitialiser le jeu
+function resetGame() {
+    state.player.x = 100;
+    state.player.y = 700;
+    state.player.velocityX = 0;
+    state.player.velocityY = 0;
+    state.player.lives = CONFIG.player.lives;
+    state.player.invulnerable = false;
+    state.player.invulnerabilityTimer = 0;
+    
+    state.fuel = CONFIG.fuel.max;
+    state.score = 0;
+    state.barrels = [];
+    state.camera.x = 0;
     
     // Réinitialiser les pièces
-    gameState.coins.forEach(coin => {
-        coin.collected = false;
-    });
+    state.coins.forEach(coin => coin.collected = false);
 }
 
-// ============================================
-// Réinitialiser seulement la position du joueur
-// ============================================
-function resetPlayerPosition() {
-    gameState.player.x = Math.max(100, GAME_CONFIG.camera.x + 100);
-    gameState.player.y = 600;
-    gameState.player.velocityX = 0;
-    gameState.player.velocityY = 0;
-    gameState.player.invulnerable = true;
-    gameState.player.invulnerabilityTimer = 120;
+// Réinitialiser le joueur
+function resetPlayer() {
+    state.player.x = Math.max(100, state.camera.x + 100);
+    state.player.y = 700;
+    state.player.velocityX = 0;
+    state.player.velocityY = 0;
+    state.player.invulnerable = true;
+    state.player.invulnerabilityTimer = 120;
 }
 
-// ============================================
 // Spawner un tonneau
-// ============================================
 function spawnBarrel() {
-    // Choisir une plateforme aléatoire (sauf le sol)
-    const platformIndex = Math.floor(Math.random() * (gameState.platforms.length - 1));
-    const platform = gameState.platforms[platformIndex];
+    // Plateforme aléatoire (sauf le sol)
+    const platformIndex = Math.floor(Math.random() * (state.platforms.length - 1));
+    const platform = state.platforms[platformIndex];
     
-    // Position aléatoire sur la plateforme
-    const x = platform.x + Math.random() * (platform.width - GAME_CONFIG.barrelWidth);
-    const y = platform.y - GAME_CONFIG.barrelHeight;
-    
-    // Direction aléatoire
+    const x = platform.x + Math.random() * (platform.width - CONFIG.barrel.width);
+    const y = platform.y - CONFIG.barrel.height;
     const direction = Math.random() > 0.5 ? 1 : -1;
     
-    gameState.barrels.push({
+    state.barrels.push({
         x: x,
         y: y,
-        width: GAME_CONFIG.barrelWidth,
-        height: GAME_CONFIG.barrelHeight,
-        velocityX: GAME_CONFIG.barrelSpeed * direction,
+        width: CONFIG.barrel.width,
+        height: CONFIG.barrel.height,
+        velocityX: CONFIG.barrel.speed * direction,
         velocityY: 0
     });
 }
 
-// ============================================
+// Mettre à jour le joueur
+function updatePlayer() {
+    const p = state.player;
+    
+    // Invulnérabilité
+    if (p.invulnerable) {
+        p.invulnerabilityTimer--;
+        if (p.invulnerabilityTimer <= 0) {
+            p.invulnerable = false;
+        }
+    }
+    
+    // Déplacement horizontal
+    if (state.keys.left) {
+        p.velocityX = -CONFIG.player.speed;
+        p.facingRight = false;
+    } else if (state.keys.right) {
+        p.velocityX = CONFIG.player.speed;
+        p.facingRight = true;
+    } else {
+        p.velocityX = 0;
+    }
+    
+    // Saut
+    if ((state.keys.up || state.keys.space) && p.isOnGround) {
+        p.velocityY = CONFIG.jumpForce;
+        p.isOnGround = false;
+    }
+    
+    // Jetpack
+    if (state.keys.shift && state.fuel > 0) {
+        p.velocityY += CONFIG.jetpackForce;
+        state.fuel -= CONFIG.fuel.consumption;
+        if (p.velocityY < -8) p.velocityY = -8;
+    } else if (state.fuel < CONFIG.fuel.max) {
+        state.fuel += CONFIG.fuel.regeneration;
+        if (state.fuel > CONFIG.fuel.max) state.fuel = CONFIG.fuel.max;
+    }
+    
+    // Gravité
+    if (!p.isOnGround) {
+        p.velocityY += CONFIG.gravity;
+    }
+    
+    // Limiter la vitesse de chute
+    if (p.velocityY > CONFIG.maxFallSpeed) {
+        p.velocityY = CONFIG.maxFallSpeed;
+    }
+    
+    // Mettre à jour la position
+    p.x += p.velocityX;
+    p.y += p.velocityY;
+    
+    // Limites du monde
+    p.x = Math.max(0, Math.min(p.x, CONFIG.worldWidth - p.width));
+}
+
 // Mettre à jour les tonneaux
-// ============================================
 function updateBarrels() {
-    gameState.barrels.forEach(barrel => {
+    state.barrels.forEach(barrel => {
         barrel.x += barrel.velocityX;
         barrel.y += barrel.velocityY;
     });
 }
 
-// ============================================
-// Mettre à jour le joueur
-// ============================================
-function updatePlayer() {
-    const player = gameState.player;
+// ==================== BOUCLE PRINCIPALE ====================
+function gameLoop() {
+    state.frameCount++;
     
-    // Gérer l'invulnérabilité
-    if (player.invulnerable) {
-        player.invulnerabilityTimer--;
-        if (player.invulnerabilityTimer <= 0) {
-            player.invulnerable = false;
-        }
-    }
-    
-    // Déplacement horizontal
-    if (gameState.keys.left) {
-        player.velocityX = -GAME_CONFIG.playerSpeed;
-        player.facingRight = false;
-    } else if (gameState.keys.right) {
-        player.velocityX = GAME_CONFIG.playerSpeed;
-        player.facingRight = true;
-    } else {
-        player.velocityX = 0;
-    }
-    
-    // Saut
-    if ((gameState.keys.up || gameState.keys.space) && player.isOnGround) {
-        player.velocityY = GAME_CONFIG.jumpForce;
-        player.isOnGround = false;
-        player.isJumping = true;
-    }
-    
-    // Jetpack
-    if (gameState.keys.shift && gameState.fuel > 0) {
-        player.velocityY += GAME_CONFIG.jetpackForce;
-        gameState.fuel -= GAME_CONFIG.fuelConsumptionRate;
-        
-        // Limiter la vitesse verticale avec le jetpack
-        if (player.velocityY < -8) {
-            player.velocityY = -8;
-        }
-    } else {
-        // Régénérer le carburant lentement quand le jetpack n'est pas utilisé
-        if (gameState.fuel < GAME_CONFIG.maxFuel) {
-            gameState.fuel += GAME_CONFIG.fuelRegenerationRate;
-            if (gameState.fuel > GAME_CONFIG.maxFuel) {
-                gameState.fuel = GAME_CONFIG.maxFuel;
-            }
-        }
-    }
-    
-    // Appliquer la gravité
-    if (!player.isOnGround) {
-        player.velocityY += GAME_CONFIG.gravity;
-    }
-    
-    // Limiter la vitesse de chute
-    if (player.velocityY > 15) {
-        player.velocityY = 15;
-    }
-    
-    // Mettre à jour la position du joueur
-    player.x += player.velocityX;
-    player.y += player.velocityY;
-    
-    // Empêcher le joueur de sortir des limites du monde horizontalement
-    if (player.x < 0) {
-        player.x = 0;
-    }
-    if (player.x + player.width > gameState.worldWidth) {
-        player.x = gameState.worldWidth - player.width;
-    }
-}
-
-// ============================================
-// Mettre à jour le jeu
-// ============================================
-function updateGame() {
-    gameState.frameCount++;
-    
-    // Spawner un tonneau périodiquement
-    if (gameState.frameCount % GAME_CONFIG.barrelSpawnRate === 0) {
+    // Spawner des tonneaux
+    if (state.frameCount % CONFIG.barrel.spawnRate === 0) {
         spawnBarrel();
     }
     
-    // Mettre à jour le joueur
+    // Mettre à jour
     updatePlayer();
-    
-    // Mettre à jour les tonneaux
     updateBarrels();
-    
-    // Mettre à jour la caméra
     updateCamera();
     
-    // Vérifier les collisions
-    checkCollisions();
+    // Collisions
+    checkPlatformCollisions();
+    checkCoinCollisions();
+    checkBarrelCollisions();
     
-    // Mettre à jour le score (basé sur la hauteur + pièces)
-    gameState.score = Math.max(0, Math.floor((gameState.worldHeight - gameState.player.y) / 5));
+    // Score basé sur la hauteur
+    state.score = Math.max(0, Math.floor((CONFIG.worldHeight - state.player.y) / 3));
     
-    // Mettre à jour l'interface utilisateur
+    // UI
     updateUI();
-}
-
-// ============================================
-// Dessiner le jeu
-// ============================================
-function drawGame() {
+    
+    // Dessiner
     drawBackground();
     drawPlatforms();
     drawCoins();
     drawBarrels();
     drawPlayer();
-}
-
-// ============================================
-// Boucle principale du jeu
-// ============================================
-function gameLoop() {
-    updateGame();
-    drawGame();
+    
+    // Continuer la boucle
     requestAnimationFrame(gameLoop);
 }
 
-// ============================================
-// Gestion des entrées clavier
-// ============================================
-function setupEventListeners() {
-    // Touches enfoncées
+// ==================== CONTRÔLES ====================
+function setupControls() {
     document.addEventListener('keydown', (e) => {
         switch (e.key) {
-            case 'ArrowLeft':
-            case 'a':
-                gameState.keys.left = true;
+            case 'ArrowLeft': case 'a': state.keys.left = true; break;
+            case 'ArrowRight': case 'd': state.keys.right = true; break;
+            case 'ArrowUp': case 'w': case ' ': 
+                state.keys.up = true;
+                state.keys.space = true;
                 break;
-            case 'ArrowRight':
-            case 'd':
-                gameState.keys.right = true;
-                break;
-            case 'ArrowUp':
-            case 'w':
-            case ' ':
-                gameState.keys.up = true;
-                gameState.keys.space = true;
-                break;
-            case 'Shift':
-                gameState.keys.shift = true;
-                break;
-            case 'r':
-            case 'R':
-                resetPlayer();
-                break;
+            case 'Shift': state.keys.shift = true; break;
+            case 'r': case 'R': resetGame(); break;
         }
     });
     
-    // Touches relâchées
     document.addEventListener('keyup', (e) => {
         switch (e.key) {
-            case 'ArrowLeft':
-            case 'a':
-                gameState.keys.left = false;
-                break;
-            case 'ArrowRight':
-            case 'd':
-                gameState.keys.right = false;
-                break;
-            case 'ArrowUp':
-            case 'w':
-                gameState.keys.up = false;
-                break;
-            case ' ':
-                gameState.keys.space = false;
-                break;
-            case 'Shift':
-                gameState.keys.shift = false;
-                break;
+            case 'ArrowLeft': case 'a': state.keys.left = false; break;
+            case 'ArrowRight': case 'd': state.keys.right = false; break;
+            case 'ArrowUp': case 'w': state.keys.up = false; break;
+            case ' ': state.keys.space = false; break;
+            case 'Shift': state.keys.shift = false; break;
         }
     });
 }
 
-// ============================================
-// Démarrer le jeu
-// ============================================
+// ==================== DÉMARRAGE ====================
 window.addEventListener('load', () => {
-    initGame();
-    setupEventListeners();
+    init();
+    setupControls();
 });
