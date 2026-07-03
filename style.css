@@ -38,6 +38,7 @@ body {
     border-radius: 5px;
     border: 1px solid #5c4a2a;
     font-size: 14px;
+    min-width: 200px;
 }
 
 #ui div {
@@ -75,6 +76,12 @@ body {
     font-weight: bold;
 }
 
+#lives-value {
+    color: #ff6b35;
+    font-weight: bold;
+    font-size: 16px;
+}
+
 #instructions {
     position: absolute;
     bottom: 20px;
@@ -83,7 +90,7 @@ body {
     padding: 15px;
     border-radius: 8px;
     border: 1px solid #5c4a2a;
-    max-width: 200px;
+    max-width: 220px;
     font-size: 14px;
 }
 
@@ -97,4 +104,25 @@ body {
 #instructions p {
     margin: 5px 0;
     color: #e0d8c0;
+}
+
+/* Animation pour les pièces collectées */
+@keyframes coinCollect {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.coin {
+    animation: coinCollect 0.3s ease;
+}
+
+/* Animation pour les tonneaux */
+@keyframes barrelRoll {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.barrel {
+    animation: barrelRoll 2s linear infinite;
 }

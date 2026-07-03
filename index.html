@@ -10,6 +10,10 @@
     <div id="game-container">
         <canvas id="game-canvas"></canvas>
         <div id="ui">
+            <div id="lives">
+                <label>Vies : </label>
+                <span id="lives-value">❤️ 3</span>
+            </div>
             <div id="fuel-gauge">
                 <label>Carburant :</label>
                 <progress id="fuel-bar" value="100" max="100"></progress>
@@ -25,8 +29,10 @@
         <h2>Contrôles :</h2>
         <p>→ ← : Se déplacer</p>
         <p>↑ ou Espace : Sauter</p>
-        <p>Maj : Activer le jetpack (consomme du carburant)</p>
+        <p>Maj : Activer le jetpack</p>
         <p>R : Réinitialiser le niveau</p>
+        <p>⚠️ Attention aux tonneaux !</p>
+        <p>💰 Collectez les pièces !</p>
     </div>
     <script src="game.js"></script>
 </body>
