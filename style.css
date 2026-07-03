@@ -10,11 +10,11 @@ body {
     font-family: 'Arial', sans-serif;
     background-color: #1a1a1a;
     color: #e0d8c0;
-    overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    overflow: hidden;
 }
 
 #game-container {
@@ -28,33 +28,34 @@ body {
     overflow: hidden;
 }
 
+/* Le canvas doit être en position absolute pour couvrir toute la game-container */
 #game-canvas {
     position: absolute;
     top: 0;
     left: 0;
-    background-color: #121212;
-    display: block;
     width: 100%;
     height: 100%;
+    background-color: #121212;
+    display: block;
     z-index: 1;
 }
 
+/* L'UI doit être au-dessus du canvas */
 #ui {
     position: absolute;
     top: 10px;
     left: 10px;
-    background-color: rgba(26, 26, 26, 0.9);
+    background-color: rgba(0, 0, 0, 0.7);
     padding: 15px;
     border-radius: 8px;
     border: 2px solid #5c4a2a;
     font-size: 16px;
-    min-width: 220px;
     z-index: 10;
+    pointer-events: none; /* Permet de cliquer à travers */
 }
 
 #ui div {
     margin: 8px 0;
-    padding: 5px 0;
 }
 
 #ui label {
@@ -73,16 +74,10 @@ body {
 #fuel-bar::-webkit-progress-value {
     background-color: #d4a76a;
     border-radius: 10px;
-    transition: width 0.3s ease;
 }
 
 #fuel-bar::-webkit-progress-bar {
     background-color: #3a3a3a;
-    border-radius: 10px;
-}
-
-#fuel-bar::-moz-progress-bar {
-    background-color: #d4a76a;
     border-radius: 10px;
 }
 
@@ -107,18 +102,18 @@ body {
     position: absolute;
     bottom: 20px;
     right: 20px;
-    background-color: rgba(26, 26, 26, 0.9);
+    background-color: rgba(0, 0, 0, 0.7);
     padding: 15px;
     border-radius: 8px;
     border: 2px solid #5c4a2a;
     max-width: 220px;
     font-size: 14px;
     z-index: 10;
+    pointer-events: none;
 }
 
 #instructions h2 {
-    margin-top: 0;
-    margin-bottom: 12px;
+    margin: 0 0 12px 0;
     color: #d4a76a;
     font-size: 18px;
     text-align: center;
@@ -127,15 +122,4 @@ body {
 #instructions p {
     margin: 6px 0;
     color: #e0d8c0;
-    font-size: 14px;
-}
-
-/* Animations */
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-
-#instructions {
-    animation: pulse 2s infinite;
 }

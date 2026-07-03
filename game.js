@@ -199,6 +199,7 @@ function init() {
     updateUI();
     
     // Démarrer la boucle de jeu
+    console.log('Jeu initialisé. Canvas:', canvas.width, 'x', canvas.height);
     requestAnimationFrame(gameLoop);
 }
 
@@ -784,6 +785,13 @@ function setupControls() {
 }
 
 // ==================== DÉMARRAGE ====================
+// Attendre que le DOM soit prêt
+window.addEventListener('DOMContentLoaded', () => {
+    init();
+    setupControls();
+});
+
+// Fallback au cas où
 window.addEventListener('load', () => {
     init();
     setupControls();
