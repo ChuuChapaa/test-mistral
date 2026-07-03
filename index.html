@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chevalier Steampunk - Jeu de Plateforme</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        <div id="ui">
+            <div id="fuel-gauge">
+                <label>Carburant :</label>
+                <progress id="fuel-bar" value="100" max="100"></progress>
+                <span id="fuel-value">100%</span>
+            </div>
+            <div id="score">
+                <label>Score : </label>
+                <span id="score-value">0</span>
+            </div>
+        </div>
+    </div>
+    <div id="instructions">
+        <h2>Contrôles :</h2>
+        <p>→ ← : Se déplacer</p>
+        <p>↑ ou Espace : Sauter</p>
+        <p>Maj : Activer le jetpack (consomme du carburant)</p>
+        <p>R : Réinitialiser le niveau</p>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
